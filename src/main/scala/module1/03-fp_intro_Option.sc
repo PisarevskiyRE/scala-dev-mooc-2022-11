@@ -16,7 +16,7 @@ sealed trait Option[+T] {
    *
    * Реализовать метод printIfAny, который будет печатать значение, если оно есть
    */
-  def printIfAny: Unit = this match {
+  def printIfAny = this match {
     case Option.Some(v) => Some(v).map(println)
     case Option.None => ()
   }
@@ -30,11 +30,18 @@ sealed trait Option[+T] {
     case Option.None => throw new Exception("get empty Option")
   }
 
-  def zip[A >: T, B](that: Option[B]):  Option[(A, B)] = {
-    if (this.isEmpty || that.isEmpty)
-      Option.None
-    else
-      Option(this.get, that.get)
+//  def zip[A >: T, B](that: Option[B]):  Option[(A, B)] = {
+//    if (this.isEmpty || that.isEmpty)
+//      Option.None
+//    else
+//      Option(this.get, that.get)
+//  }
+//*******************************
+// исправленый вариант
+  def zip[A >: T, B](that: Option[B]): Option[(A, B)] =
+    (that , this) match {
+    case (Option.Some(x), Option.Some(y)) => Option(this.get, that.get)
+    case _ => Option.None
   }
 
   /**
@@ -42,8 +49,18 @@ sealed trait Option[+T] {
    * Реализовать метод filter, который будет возвращать не пустой Option
    * в случае если исходный не пуст и предикат от значения = true
    */
-  def filter(f: T => Boolean): Option[T] = {
-    if (this.isEmpty || f(this.get)) this else Option.None
+//  def filter(f: T => Boolean): Option[T] = {
+//    if (this.isEmpty || f(this.get)) this else Option.None
+//  }
+//  option match {
+//    case Some(x) if p(x) => Some(x)
+//    case _ => None
+//  }
+//*******************************
+// исправленый вариант
+  def filter(f: T => Boolean): Option[T] = this match {
+    case Option.Some(x) if f(x) => Option.Some(x)
+    case _ => Option.None
   }
 }
 
