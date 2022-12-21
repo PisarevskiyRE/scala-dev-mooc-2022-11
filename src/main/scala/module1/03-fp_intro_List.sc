@@ -56,8 +56,8 @@ sealed trait List[+T] {
 
     def loop(xs: List[T], acc: List[T] = List[T]()): List[T] = {
       xs match {
-        case List.::(head, tail) if f(head) == true => loop(tail, head :: acc)
-        case List.Nil => acc
+        case List.::(head, tail) if f(head) => loop(tail, head :: acc)
+        case _ => acc
       }
     }
     loop(this)
@@ -103,7 +103,7 @@ object List {
   case object Nil extends List[Nothing]
 
   def apply[A](v: A*): List[A] =
-    if (v.isEmpty) Nil else ::(v.head, apply(v.tail: _*))
+    if (v.isEmpty) List.Nil else ::(v.head, apply(v.tail: _*))
 
 
 }
@@ -112,7 +112,7 @@ val test = List(12,23,45,6)
 
 test.map(x=>x+1).reverse.mkString(",")
 
-//test.filter(x => x >= 10)
+test.filter(x => x >= 10)
 
 test.incList(List(12,23,45,6))
 test.shoutString(List("1","2"))
