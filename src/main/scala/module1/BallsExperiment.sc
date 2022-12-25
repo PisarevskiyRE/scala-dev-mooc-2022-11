@@ -9,8 +9,8 @@ case class BallsExperiment() {
   def isFirstBlackSecondWhite(): Boolean = {
     // вспомогательная функция принимает мешок с шарами, возвращает 1 выбранный и остальные оставшиеся
     def getBall(balls: List[Boolean]): (Boolean, List[Boolean]) = {
-      // от 0 до 5
-      val rand = Random.nextInt(5)
+
+      val rand = Random.nextInt(balls.length)
 
       // возвращаем выбраный шар и остальные шары в мешке, кроме выбранного
       (balls(rand), balls.zipWithIndex.collect{ case (a, i) if i != rand => a })
@@ -53,10 +53,10 @@ object BallsTest {
 
 }
 
-// 1000000  - 0.23966
-// 100000   - 0.2409
-// 10000    - 0.2421
-// 1000     - 0.222
-// 100      - 0.21
-// 10       - 0.4
+// 1000000  - 0.29993 / 0.29993 / 0.299464
+// 100000   - 0.30069 / 0.30094 / 0.30048
+// 10000    - 0.2934 / 0.305 / 0.2968
+// 1000     - 0.298 / 0.285 / 0.292
+// 100      - 0.23 / 0.23 / 0.33
+// 10       - 0.5 / 0.4 / 0.3
 BallsTest.main()
