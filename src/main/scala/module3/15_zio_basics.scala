@@ -157,37 +157,53 @@ object zioOperators {
    * 1. Создать ZIO эффект который будет читать строку из консоли
    */
 
-  lazy val readLine = ???
+  lazy val readLine: Task[String] = ZIO.effect(StdIn.readLine())
 
   /** *
    *
    * 2. Создать ZIO эффект который будет писать строку в консоль
    */
 
-  def writeLine(str: String) = ???
+  def writeLine(str: String): Task[Unit] = ZIO.effect(println(str))
 
   /** *
    * 3. Создать ZIO эффект котрый будет трансформировать эффект содержащий строку в эффект содержащий Int
    */
 
-  lazy val lineToInt = ???
+    // думаю тут скорее всего ошибка в сигнатуре была и должен был быть def
+  lazy val lineToInt: Task[String] => Task[Int] = _.flatMap(str => ZIO.succeed(str.toInt))
   /** *
    * 3.Создать ZIO эффект, который будет работать как echo для консоли
    *
    */
 
-  lazy val echo = ???
+  lazy val echo = for {
+    str <- ZIO.effect(StdIn.readLine())
+    _ <- ZIO.effect(println(str))
+  } yield ()
 
   /**
    * Создать ZIO эффект, который будет привествовать пользователя и говорить, что он работает как echo
    */
 
-  lazy val greetAndEcho = ???
+  lazy val greetAndEcho = for {
+    _ <- ZIO.effect(println("Привет!"))
+    str <- ZIO.effect(StdIn.readLine())
+    _ <- ZIO.effect(println(str))
+  } yield ()
 
 
 
   // greet and echo улучшенный
-  lazy val _: ZIO[Any, Throwable, Unit] = ???
+  //
+  // ??? не понятно что нужно сделать
+  // заменил на вызов уже обьявленых ZIO
+  //
+  //
+  lazy val _: ZIO[Any, Throwable, Unit] = for {
+    _ <- writeLine("Привет!")
+    _ <- echo
+  } yield ()
 
 
   /**
@@ -195,19 +211,28 @@ object zioOperators {
    * строки из консоли, преобразовывать их в числа, а затем складывать их
    */
 
-  lazy val r1 = ???
+  lazy val r1 = for {
+    x <- readLine.map( a => a.toInt)
+    y <- readLine.map( b => b.toInt)
+    _ <- writeLine((x+y).toString)
+  } yield ()
 
   /**
    * Второй вариант
    */
 
-  lazy val r2: ZIO[Any, Throwable, Int] = ???
+  lazy val r2: Task[Int] = for {
+    first <- lineToInt(readLine)
+    second <- lineToInt(readLine)
+  } yield first + second
 
   /**
    * Доработать написанную программу, чтобы она еще печатала результат вычисления в консоль
    */
 
-  lazy val r3 = ???
+  lazy val r3 = for {
+    _ <- writeLine(r2.toString)
+  }
 
 
   lazy val a: Task[Int] = ???
