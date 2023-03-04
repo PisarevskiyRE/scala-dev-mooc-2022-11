@@ -1,7 +1,8 @@
 package module3
 
-import zio.ZIO
-import zio.Task
+import module3.zioOperators.writeLine
+import module3.zioRecursion.{factorialZ, fibZ}
+import zio.{ExitCode, Task, URIO, ZIO}
 
 import scala.io.StdIn
 import scala.util.Try
@@ -63,7 +64,33 @@ object zioRecursion {
 
 
 
-  def fibZ(n: Int) = ???
+  def fibZ(n: Int): Task[Long] = {
+    if(n == 0 || n == 1) ZIO.succeed(n)
+    else ZIO.effect(fib(n - 1)).zipWith(ZIO.effect(fib(n - 2)))(_ + _)
+  }
 
+
+}
+// тест рекурсий
+object testZIORecursion extends zio.App {
+
+  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = {
+    (factorialZ(10).map(x => println(x))     zip     fibZ(10).map(x => println(x))).exitCode
+  }
+
+
+  val program1 = for {
+    result <- factorialZ(5)
+    _      <- ZIO.effect(println(s"Result: $result"))
+  } yield ()
+
+
+  val program2 = for {
+    result <- fibZ(11)
+    _ <- ZIO.effect(println(s"Result: $result"))
+  } yield ()
+
+  zio.Runtime.default.unsafeRun(program1)
+  zio.Runtime.default.unsafeRun(program2)
 
 }

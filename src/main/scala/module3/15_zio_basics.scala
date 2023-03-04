@@ -212,8 +212,8 @@ object zioOperators {
    */
 
   lazy val r1 = for {
-    x <- readLine.map( a => a.toInt)
-    y <- readLine.map( b => b.toInt)
+    x <- readLine.map( a => a.toInt).orElse(ZIO.succeed(0))
+    y <- readLine.map( b => b.toInt).orElse(ZIO.succeed(0))
     _ <- writeLine((x+y).toString)
   } yield ()
 
@@ -222,9 +222,9 @@ object zioOperators {
    */
 
   lazy val r2: Task[Int] = for {
-    first <- lineToInt(readLine)
-    second <- lineToInt(readLine)
-  } yield first + second
+    x <- lineToInt(readLine)
+    y <- lineToInt(readLine)
+  } yield x + y
 
   /**
    * Доработать написанную программу, чтобы она еще печатала результат вычисления в консоль
@@ -232,7 +232,7 @@ object zioOperators {
 
   lazy val r3 = for {
     _ <- writeLine(r2.toString)
-  }
+  } yield ()
 
 
   lazy val a: Task[Int] = ???
