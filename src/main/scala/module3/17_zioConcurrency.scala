@@ -43,26 +43,26 @@ object zioConcurrency {
   )
 
   /**
-   * Эффект который все что делает, это спит заданное кол-во времени, в данном случае 1 секунду
-   */
+  * Эффект который все что делает, это спит заданное кол-во времени, в данном случае 1 секунду
+  */
   val sleep1Second: URIO[Clock, Unit] = ZIO.sleep(1 seconds)
 
   /**
-   * Эффект который все что делает, это спит заданное кол-во времени, в данном случае 1 секунду
-   */
+  * Эффект который все что делает, это спит заданное кол-во времени, в данном случае 1 секунду
+  */
   val sleep3Seconds = ZIO.sleep(3 seconds)
 
   /**
-   * Создать эффект который печатает в консоль GetExchangeRatesLocation1 спустя 3 секунды
-   */
-     lazy val getExchangeRatesLocation1 =
-       sleep3Seconds zipRight ZIO.effect(println("GetExchangeRatesLocation1"))
+  * Создать эффект который печатает в консоль GetExchangeRatesLocation1 спустя 3 секунды
+  */
+  lazy val getExchangeRatesLocation1 =
+   sleep3Seconds zipRight ZIO.effect(println("GetExchangeRatesLocation1"))
 
   /**
-   * Создать эффект который печатает в консоль GetExchangeRatesLocation2 спустя 1 секунду
-   */
-      lazy val getExchangeRatesLocation2 =
-        sleep1Second zipRight ZIO.effect(println("GetExchangeRatesLocation2"))
+  * Создать эффект который печатает в консоль GetExchangeRatesLocation2 спустя 1 секунду
+  */
+  lazy val getExchangeRatesLocation2 =
+   sleep1Second zipRight ZIO.effect(println("GetExchangeRatesLocation2"))
 
 
 
@@ -142,12 +142,12 @@ object zioConcurrency {
   /**
    * Получние информации от сервиса занимает 1 секунду
    */
-  def getFromService(ref: Ref[Int]) = ???
+  def getFromService(ref: Ref[Int]) = sleep1Second zipRight ref.update(_ + 1)
 
   /**
    * Отправка в БД занимает в общем 5 секунд
    */
-  def sendToDB(ref: Ref[Int]): ZIO[Clock, Exception, Unit] = ???
+  def sendToDB(ref: Ref[Int]): ZIO[Clock, Exception, Unit] = sleep3Seconds zipRight ref.update(_ + 1)
 
 
   /**
@@ -156,7 +156,14 @@ object zioConcurrency {
    */
 
   
-  lazy val app1 = ???
+  lazy val app1 = for {
+    cnt <- Ref.make(0)
+    s1 <- getFromService(cnt).fork
+    s2 <- sendToDB(cnt).fork
+    _ <- s1.join
+    _ <- s2.join
+    _ <- ZIO.effect(println(cnt))
+  } yield ()
 
   /**
    *  Concurrent operators
