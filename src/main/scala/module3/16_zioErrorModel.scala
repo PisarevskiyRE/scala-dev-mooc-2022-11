@@ -89,7 +89,7 @@ object zioErrorHandling {
    * Можем ли мы как-то избежать потерю информации об ошибке, в случае композиции?
     */
 
-  lazy val io3: zio.IO[Either[String, Int], (String, String)] = io1.mapError(Left(_)).zip(io2.mapError(Right(_)))
+  lazy val io3: zio.IO[Either[String, Int], (String, String)] = io1.mapError(Left(_)) zip io2.mapError(Right(_))
 
 
 
@@ -102,7 +102,7 @@ object zioErrorHandling {
   /**
    * Залогировать ошибку effFromEither, не меняя ее тип и тип возвращаемого значения
    */
-  lazy val z2: zio.ZIO[Any, String, UserId] = effFromEither.tapError{ e =>
+  lazy val z2: zio.ZIO[Any, String, Int] = effFromEither.tapError{ e =>
     zio.ZIO.effect(println(e)).orDie
   }
 
@@ -111,14 +111,16 @@ object zioErrorHandling {
    * Изменить ошибку effFromEither
    */
 
-  lazy val z3 = ???
+    // ???
+  lazy val z3 = effFromEither.mapError(_ => new Exception("Изменение ошибки"))
 
-
+  // не понятно что нужно сделать тут?
   lazy val z4 = ???
 
 
   // трансформировать ошибку
-  lazy val z5 = ???
+  // ???
+  lazy val z5 = z3.catchAll(_ => zio.ZIO.fail(new RuntimeException("1")))
 
 
   // Разные типы ошибок
@@ -137,7 +139,7 @@ object zioErrorHandling {
     def sendSMS(user: User, msg: String): IO[NotificationBySMSFailed.type, Unit] = ???
 
     def sendNotification(userId: UserId): IO[NotificationError, Unit] = for {
-      user <- getUserById(1).orDie
+      user <- getUserById(userId).orDie
       _ <- sendEmail(user, "Hello")
       _ <- sendSMS(user, "hello")
     } yield ()
