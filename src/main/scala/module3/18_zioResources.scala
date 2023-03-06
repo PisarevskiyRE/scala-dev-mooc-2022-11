@@ -153,18 +153,27 @@ object toyZManaged{
   final case class ZManaged[-R, +E, A](
                                         acquire: ZIO[R, E, A],
                                         release: A => URIO[R, Any]
-                                      ){ self =>
+                                      )
+  { self =>
 
 
     def use[R1 <: R, E1 >: E, B](f: A => ZIO[R1, E1, B]): ZIO[R1, E1, B] =
       acquire.bracket(release)(f)
 
-    def map[B](f: A => B): ZManaged[R, E, B] = ???
+    def map[B](f: A => B): ZManaged[R, E, B] = ZManaged(
+      acquire.map(f),
+      release
+    )
 
-    def flatMap[R1 <: R, E1 >: E, B](f: A => ZManaged[R1, E1, B]): ZManaged[R1, E1, B] = ???
-
+    // не понимаю как получить новый release из f и нужно ли его получать???
+    // добавил B <: A
+    // ???
+    def flatMap[R1 <: R, E1 >: E, B <: A](f: A => ZManaged[R1, E1, B]): ZManaged[R1, E1, B] =
+      ZManaged(
+        acquire.flatMap(a => f(a).acquire),
+        b => f(b).release(b)
+      )
   }
-
 }
 
 object zioZManaged{
