@@ -160,7 +160,7 @@ object toyZManaged{
     def use[R1 <: R, E1 >: E, B](f: A => ZIO[R1, E1, B]): ZIO[R1, E1, B] =
       acquire.bracket(release)(f)
 
-    def map[B](f: A => B): ZManaged[R, E, B] = ZManaged(
+    def map[B <: A](f: A => B): ZManaged[R, E, B] = ZManaged(
       acquire.map(f),
       release
     )
