@@ -1,9 +1,8 @@
 package module3
 
-import zio.Has
-import zio.Task
+import module3.emailService.EmailAddress
+import zio.{Has, Task, ULayer, ZIO, ZLayer}
 import userService.{User, UserID}
-import zio.{ZLayer, ULayer}
 import zio.macros.accessible
 
 package object userDAO {
@@ -23,8 +22,18 @@ package object userDAO {
             def findBy(id: UserID): Task[Option[User]]
           }
 
-         val live: ULayer[UserDAO] = ???
+
+        private val dbResponse = List(User(UserID(1), EmailAddress("email1@a.ocom")),
+          User(UserID(2), EmailAddress("email2@a.ocom")))
+
+
+         val live: ULayer[UserDAO] = ZLayer.succeed(
+           new Service{
+             override def list(): Task[List[User]] = ZIO.succeed(dbResponse)
+
+             override def findBy(id: UserID): Task[Option[User]] = ZIO.succeed(dbResponse.find(x => {x.id == id}))
+
+           }
+         )
       }
-
-
 }
